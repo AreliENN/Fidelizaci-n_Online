@@ -71,133 +71,115 @@ function handleFormSubmission($pdo) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="css/general.css" />
     <style>
-body {
+        body {
   font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
   font-size: 16px;
   line-height: 1.6;
-  color: #222;
-  background-color: #e9eff5;
-  margin: 0;
-  padding: 0;
+  color: #333;
+  background-color: #f8f9fa;
+}
+
+.header {
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.header a {
+  margin-right: 1rem;
+  font-size: 1.5rem;
+  color: #556;
+  text-decoration: none;
 }
 
 .container {
-  max-width: 960px;
-  margin: 2rem auto;
-  background-color: #fff;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  max-width: 900px;
+  margin-top: 2rem;
 }
 
 .page-header {
+  margin: 2rem 0 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color:rgb(0, 0, 255);
-  color: #fff;
-  padding: 1rem 1.5rem;
-  border-radius: 8px;
-  margin-bottom: 2rem;
+  border-bottom: 2px solid #007bff;
+  padding-bottom: 0.5rem;
 }
 
 .page-header h2 {
-  font-size: 1.8rem;
-  font-weight: bold;
+  color: #007bff;
+  font-weight: 700;
   margin: 0;
 }
 
-.page-header a {
-  color: #fff;
-  text-decoration: none;
-  background-color: #0056b3;
-  padding: 0.6rem 1.2rem;
-  border-radius: 6px;
-  font-weight: bold;
-}
-
 .card {
-  background-color: #fdfdfd;
+  padding: 1.5rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #ddd;
   border-radius: 10px;
-  padding: 1.8rem;
-  margin-top: 1.5rem;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.07);
-}
-
-.card h4 {
-  margin-bottom: 1.5rem;
-  color: #007bff;
+  background-color: #ffffff;
+  margin-bottom: 2rem;
 }
 
 .btn {
-  padding: 0.7rem 1.5rem;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
+  padding: 0.6rem 1.4rem;
+  border-radius: 6px;
+  font-weight: 500;
 }
 
 .btn-primary {
   background-color: #007bff;
-  border: none;
-  color: #fff;
+  border-color: #007bff;
 }
 
 .btn-primary:hover {
   background-color: #0056b3;
+  border-color: #004d99;
 }
 
-.btn-secondary {
-  background-color: #6c757d;
-  border: none;
-  color: #fff;
-}
-
-.btn-secondary:hover {
-  background-color: #545b62;
+.btn-outline-secondary, .btn-secondary {
+  min-width: 110px;
+  font-weight: 600;
+  margin-left: 0.7rem;
 }
 
 .form-label {
   font-weight: 600;
 }
 
-.form-control,
-.form-select {
-  border-radius: 8px;
-  padding: 0.6rem;
-  font-size: 1rem;
+.form-select, .form-control {
+  border-radius: 6px;
+}
+
+.thumb {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 4px;
 }
 
 .table {
   margin-top: 1.5rem;
-  border-collapse: collapse;
-  width: 100%;
 }
 
-.table th,
-.table td {
-  padding: 1rem;
-  border-bottom: 1px solid #dee2e6;
+.table th, .table td {
+  vertical-align: middle;
+  padding: 0.75rem;
 }
 
 .table thead {
-  background-color: #007bff;
-  color: #fff;
+  background-color: #f0f2f5;
+  font-weight: bold;
 }
 
-.table-striped tbody tr:nth-child(odd) {
-  background-color: #f8f9fa;
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: #fafafa;
 }
 
 .table-striped tbody tr:hover {
-  background-color: #e2e6ea;
+  background-color: #f1f7ff;
 }
 
-.thumb {
-  width: 90px;
-  height: 90px;
-  border-radius: 8px;
-  object-fit: cover;
-}
 </style>
 
 </head>
