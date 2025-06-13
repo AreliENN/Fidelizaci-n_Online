@@ -76,58 +76,89 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Programa de Fidelización</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     
     <style>
-        body {
-            height: 100vh;
-            background: url('img/fon.jpg') no-repeat center center fixed;
-            background-size: cover;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .overlay {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.3);
-        }
-        .login-form {
-            width: 380px;
-            padding: 25px;
-            border-radius: 12px;
-            background: white;
-            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.3);
-            position: relative; z-index: 1;
-        }
-        .login-form:hover {
-            box-shadow: 0px 15px 40px rgba(0, 0, 0, 0.4);
-        }
-        .card-title {
-            font-weight: bold;
-            color: #333;
-        }
-        .btn {
-            font-size: 16px;
-            margin-top: 20px;
-            font-weight: bold;
-            border-radius: 8px;
-        }
-        .sign-up, .forgot-password {
-            text-align: center;
-            padding-top: 15px;
-            font-size: 14px;
-        }
-        .forgot-password a {
-            cursor: pointer;
-        }
-        .error-alert {
-            color: #e74c3c;
-            text-align: center;
-            margin-bottom: 15px;
-        }
+body {
+    font-family: 'Inter', sans-serif;
+    height: 100vh;
+    background: url('img/fon.jpg') no-repeat center center fixed;
+    background-size: cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+}
+
+.overlay {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Más contraste */
+    z-index: 0;
+}
+
+.login-form {
+    width: 100%;
+    max-width: 400px;
+    padding: 30px;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+    position: relative;
+    z-index: 1;
+    transition: all 0.3s ease;
+}
+
+.login-form:hover {
+    box-shadow: 0 16px 45px rgba(0, 0, 0, 0.5);
+}
+
+.card-title {
+    font-weight: 600;
+    color: #222;
+    margin-bottom: 25px;
+}
+
+.form-label {
+    font-weight: 500;
+    color: #444;
+}
+
+.form-control {
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 15px;
+    border: 1px solid #ccc;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    font-weight: 600;
+    padding: 10px;
+    border-radius: 10px;
+    transition: background-color 0.2s ease;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.error-alert {
+    background-color: #f8d7da;
+    color: #842029;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-bottom: 20px;
+    border: 1px solid #f5c2c7;
+    text-align: center;
+}
+
     </style>
     <script>
         function validarFormulario(event) {
@@ -156,13 +187,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     <?php endif; ?>
                     <form method="POST" onsubmit="validarFormulario(event)">
                         <div class="mb-3">
-                            <label>Teléfono</label>
+                            <label class="form-label">Teléfono</label>
                             <input type="text" name="telefono" class="form-control" pattern="\d{10,15}" title="Sólo números, entre 10 y 15 dígitos" required>
                         </div>
                         <div class="mb-3">
-                            <label>Contraseña</label>
+                            <label class="form-label">Contraseña</label>
                             <input type="password" name="password" class="form-control" required>
                         </div>
+                        <div class="forgot-password mt-3">
+    <a id="linkForgot" class="text-decoration-none text-muted">¿Olvidaste tu contraseña?</a>
+</div>
+
                         <div class="g-recaptcha mb-3" data-sitekey="6LcFLMsqAAAAAO5WlI_bGH3Dyd-Isf_4Raoh9QPP"></div>
                         <button type="submit" class="btn btn-primary w-100">Ingresar</button>
                     </form>
