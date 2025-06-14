@@ -86,18 +86,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>CRUD Clientes</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
   <style>
     body {
       background-color: #f5f7fa;
     }
-    .page-header {
-      margin: 2rem 0 1rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 2px solid #007bff;
-      padding-bottom: 0.5rem;
-    }
+    /* Encabezado de la página */
+.page-header {
+  margin: 2rem 0 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 3px solid #0d6efd;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
     .page-header h2 {
       color: #007bff;
       font-weight: 700;
@@ -177,7 +181,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <?php if ($action === 'list'): ?>
-      <a href="?action=add" class="btn btn-primary mb-3">Alta Cliente</a>
+      <!-- Botones con íconos -->
+<a href="?action=add" class="btn btn-success mb-3">
+  <i class="bi bi-person-plus-fill"></i> Alta Cliente
+</a>
+
       <div class="card">
         <div class="table-container">
           <table class="table table-striped table-hover align-middle">
@@ -199,13 +207,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                   <td><?= htmlspecialchars($row[$col['Field']]) ?></td>
                 <?php endforeach ?>
                 <td class="text-center">
-                  <a href="?action=edit&id=<?= $row[$pk] ?>" class="btn btn-sm btn-warning">Modificar</a>
-                  <form method="POST" class="d-inline" onsubmit="return confirm('¿Eliminar?');">
-                    <input type="hidden" name="form_type" value="delete">
-                    <input type="hidden" name="<?= $pk ?>" value="<?= $row[$pk] ?>">
-                    <button class="btn btn-sm btn-danger">Baja Cliente</button>
-                  </form>
-                </td>
+  <a href="?action=edit&id=<?= $row[$pk] ?>" class="btn btn-sm btn-outline-warning">
+    <i class="bi bi-pencil-square"></i> Modificar
+  </a>
+  <form method="POST" class="d-inline" onsubmit="return confirm('¿Eliminar?');">
+    <input type="hidden" name="form_type" value="delete">
+    <input type="hidden" name="<?= $pk ?>" value="<?= $row[$pk] ?>">
+    <button class="btn btn-sm btn-outline-danger">
+      <i class="bi bi-trash3-fill"></i> Dar Baja
+    </button>
+  </form>
+</td>
+
               </tr>
             <?php endforeach ?>
             </tbody>
