@@ -1,10 +1,10 @@
-<?php
+<?php 
 session_start();
-// Configuración de la conexión a la base de datos
+// Conexión a la base de datos
 $host = 'localhost';
 $db   = 'fidelizacion';
 $user = 'root';
-$pass = ''; 
+$pass = '';
 $dsn  = "mysql:host=$host;dbname=$db;charset=utf8mb4";
 
 try {
@@ -16,55 +16,70 @@ try {
     die("Error de conexión: " . $e->getMessage());
 }
 
-$error = '';
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $telefono           = trim($_POST['telefono']);
-    $password           = trim($_POST['password']);
-    $recaptcha_response = $_POST['g-recaptcha-response'];
+// Paso 2: Confirmación de voz
+if (isset($_GET['voice'], $_GET['confirm']) && isset($_SESSION['temp_user_id'])) {
+    if ($_GET['confirm'] === $_SESSION['temp_rol']) {
+        $_SESSION['user_id'] = $_SESSION['temp_user_id'];
+        $_SESSION['nombre']  = $_SESSION['temp_nombre'];
+        $_SESSION['rol']     = $_SESSION['temp_rol'];
+        unset(
+            $_SESSION['temp_user_id'],
+            $_SESSION['temp_nombre'],
+            $_SESSION['temp_rol'],
+            $_SESSION['show_voice']
+        );
+        header('Location: ' . (
+            $_SESSION['rol'] === 'admin'
+                ? 'Interfaz_administrador.php'
+                : 'Interfaz_cliente.php'
+        ));
+        exit;
+    } else {
+        session_destroy();
+        header('Location: Login.php?error=voz_incorrecta');
+        exit;
+    }
+}
 
-    // Verificación de reCAPTCHA
-    $secret = '6LcFLMsqAAAAAMMmKCNOan23g4-5xjADqBnfF2-q';
-    $verify = file_get_contents(
-        "https://www.google.com/recaptcha/api/siteverify?secret={$secret}&response={$recaptcha_response}"
-    );
-    $response_data = json_decode($verify);
+if (isset($_GET['voice']) && empty($_SESSION['show_voice'])) {
+    header('Location: Login.php');
+    exit;
+}
+
+$error = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $telefono = trim($_POST['telefono']);
+    $password = trim($_POST['password']);
 
     if (empty($telefono) || empty($password)) {
-        $error = 'Ingresa teléfono y contraseña.';
-    } elseif (! $response_data->success) {
-        $error = 'Error de reCAPTCHA. Inténtalo de nuevo.';
+        $error = 'Por favor, completa todos los campos.';
     } else {
-        // Inicio de sesion como administrador 
-        $stmt = $pdo->prepare('SELECT id_admin AS id, nombre, contraseña FROM administrador WHERE telefono = ?');
+        $stmt = $pdo->prepare(
+            'SELECT id_admin AS id, nombre, contraseña FROM administrador WHERE telefono = ?'
+        );
         $stmt->execute([$telefono]);
-        $admin = $stmt->fetch();
-        if ($admin && $password === $admin['contraseña']) {
-            $_SESSION['user_id'] = $admin['id'];
-            $_SESSION['nombre']  = $admin['nombre'];
-            $_SESSION['rol']     = 'admin';
-            echo "<script>
-                    alert('Bienvenido, {$admin['nombre']}');
-                    window.location.href='Interfaz_administrador.php';
-                  </script>";
+        $user = $stmt->fetch();
+        $rol  = 'admin';
+
+        if (!$user) {
+            $stmt = $pdo->prepare(
+                'SELECT id_cliente AS id, nombre, contraseña FROM cliente WHERE telefono_movil = ?'
+            );
+            $stmt->execute([$telefono]);
+            $user = $stmt->fetch();
+            $rol  = 'cliente';
+        }
+
+        if ($user && $password === $user['contraseña']) {
+            $_SESSION['temp_user_id'] = $user['id'];
+            $_SESSION['temp_nombre']  = $user['nombre'];
+            $_SESSION['temp_rol']     = $rol;
+            $_SESSION['show_voice']   = true;
+            header('Location: login.php?voice=1');
             exit;
         }
 
-        // Inicio de sesion como cliente 
-        $stmt = $pdo->prepare('SELECT id_cliente AS id, nombre, contraseña FROM cliente WHERE telefono_movil = ?');
-        $stmt->execute([$telefono]);
-        $cliente = $stmt->fetch();
-        if ($cliente && $password === $cliente['contraseña']) {
-            $_SESSION['user_id'] = $cliente['id'];
-            $_SESSION['nombre']  = $cliente['nombre'];
-            $_SESSION['rol']     = 'cliente';
-            echo "<script>
-                    alert('Bienvenido, {$cliente['nombre']}');
-                    window.location.href='Interfaz_cliente.php';
-                  </script>";
-            exit;
-        }
-        // Credenciales inválidas
-        $error = 'Teléfono o contraseña incorrectos.';
+        $error = 'Las credenciales ingresadas no son válidas.';
     }
 }
 ?>
@@ -74,101 +89,139 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Programa de Fidelización</title>
+    <title>Login - Fidelización</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-    
     <style>
         body {
             height: 100vh;
-            background: url('img/fon.jpg') no-repeat center center fixed;
-            background-size: cover;
+            background: linear-gradient(to right, #f3f4f6, #e2e8f0);
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-        .overlay {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.3);
+            font-family: 'Segoe UI', sans-serif;
         }
         .login-form {
-            width: 380px;
-            padding: 25px;
-            border-radius: 12px;
-            background: white;
-            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.3);
-            position: relative; z-index: 1;
-        }
-        .login-form:hover {
-            box-shadow: 0px 15px 40px rgba(0, 0, 0, 0.4);
-        }
-        .card-title {
-            font-weight: bold;
-            color: #333;
-        }
-        .btn {
-            font-size: 16px;
-            margin-top: 20px;
-            font-weight: bold;
-            border-radius: 8px;
-        }
-        .sign-up, .forgot-password {
+            background: #fff;
+            padding: 3rem 3.5rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            width: 100%;
+            max-width: 500px;
             text-align: center;
-            padding-top: 15px;
-            font-size: 14px;
         }
-        .forgot-password a {
-            cursor: pointer;
+        .login-form h3 {
+            font-size: 2rem;
+            margin-bottom: 2rem;
         }
-        .error-alert {
-            color: #e74c3c;
+        .form-control {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            font-size: 1.1rem;
+            border-radius: 10px;
+            border: 1px solid #d1d5db;
+        }
+        .btn-login {
+            width: 100%;
+            padding: 1rem;
+            background-color: #3b82f6;
+            color: white;
+            transition: background-color 0.3s ease;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+        }
+        .btn-login:hover { background-color: #2563eb; }
+        .error-alert { color: #c0392b; margin-bottom: 1.5rem; }
+        #voiceModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 1050;
+        }
+        #voiceContent {
+            background: #ffffff;
+            border: 2px solid #3b82f6;
+            padding: 2rem;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 400px;
+            margin: 6% auto;
             text-align: center;
-            margin-bottom: 15px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+        .microphone-icon {
+            font-size: 2rem;
+            color: #3b82f6;
+            margin-bottom: 0.5rem;
+        }
+        #voiceSentence {
+            font-weight: bold;
+            font-size: 1.4rem;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+        #voiceInput {
+            text-align: center;
+            font-style: italic;
+            color: #374151;
+        }
+        #voiceStatus {
+            margin-top: 1rem;
+            font-weight: 600;
         }
     </style>
-    <script>
-        function validarFormulario(event) {
-            var response = grecaptcha.getResponse();
-            if (response.length === 0) {
-                event.preventDefault();
-                alert("Por favor, completa el reCAPTCHA antes de continuar.");
-            }
-        }
-        $(document).ready(function(){
-            $("#linkForgot").click(function(){
-                $("#modalEmail").modal("show");
-            });
-        });
-    </script>
 </head>
 <body>
-    <div class="overlay"></div>
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-4">
-                <div class="login-form">
-                    <h3 class="text-center card-title">Iniciar sesión</h3>
-                    <?php if (!empty($error)): ?>
-                        <div class="error-alert"><?= htmlspecialchars($error) ?></div>
-                    <?php endif; ?>
-                    <form method="POST" onsubmit="validarFormulario(event)">
-                        <div class="mb-3">
-                            <label>Teléfono</label>
-                            <input type="text" name="telefono" class="form-control" pattern="\d{10,15}" title="Sólo números, entre 10 y 15 dígitos" required>
-                        </div>
-                        <div class="mb-3">
-                            <label>Contraseña</label>
-                            <input type="password" name="password" class="form-control" required>
-                        </div>
-                        <div class="g-recaptcha mb-3" data-sitekey="6LcFLMsqAAAAAO5WlI_bGH3Dyd-Isf_4Raoh9QPP"></div>
-                        <button type="submit" class="btn btn-primary w-100">Ingresar</button>
-                    </form>
-                </div>
+<div class="login-form">
+    <h3>Iniciar Sesión</h3>
+    <?php if ($error && !isset($_GET['voice'])): ?>
+        <div class="error-alert text-center"><?= htmlspecialchars($error) ?></div>
+    <?php endif; ?>
+    <?php if (!isset($_GET['voice'])): ?>
+        <form method="POST">
+            <input type="text" name="telefono" class="form-control" placeholder="Teléfono" required pattern="\d{10,15}">
+            <input type="password" name="password" class="form-control" placeholder="Contraseña" required>
+            <button type="submit" class="btn-login">Continuar</button>
+        </form>
+    <?php else: ?>
+        <div id="voiceModal">
+            <div id="voiceContent">
+                <div class="microphone-icon">🎤</div>
+                <h4 class="mb-3">Autenticación por Voz</h4>
+                <p class="mb-2">Pronuncia la siguiente palabra clave:</p>
+                <p id="voiceSentence">Cargando...</p>
+                <input id="voiceInput" class="form-control" readonly placeholder="Texto reconocido">
+                <button id="startListening" class="btn-login mt-3">Hablar</button>
+                <p id="voiceStatus"></p>
             </div>
         </div>
-    </div>
+    <?php endif; ?>
+</div>
+<?php if (isset($_GET['voice'])): ?>
+<script>
+    const sentences = ['acceder','validar','continuar','confirmado','bienvenido','ingresar','autenticado','inicio','permitido'];
+    let fraseActual = '', validado = false;
+    const modal = document.getElementById('voiceModal'), sentenceEl = document.getElementById('voiceSentence');
+    const inputEl = document.getElementById('voiceInput'), statusEl = document.getElementById('voiceStatus');
+    const btn = document.getElementById('startListening');
+    function normalizar(txt) { return txt.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu,'').replace(/[.,!?;:]/g,'').trim(); }
+    function nuevaFrase() { validado=false; statusEl.textContent=''; inputEl.value=''; btn.textContent='Hablar'; fraseActual=sentences[Math.floor(Math.random()*sentences.length)]; sentenceEl.textContent=fraseActual.charAt(0).toUpperCase()+fraseActual.slice(1); }
+    function mostrarModal() { modal.style.display='block'; nuevaFrase(); history.replaceState(null,'',window.location.pathname+'?voice=1'); }
+    const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if (!SpeechRecognition) { alert('Tu navegador no soporta reconocimiento de voz.'); }
+    else {
+        const recog=new SpeechRecognition(); recog.lang='es-ES'; recog.interimResults=true; recog.maxAlternatives=1;
+        recog.addEventListener('result',e=>{ let txt=''; for(let r of e.results) txt+=r[0].transcript; inputEl.value=txt; });
+        recog.addEventListener('end',()=>{ const hablado=normalizar(inputEl.value), objetivo=normalizar(fraseActual); if(hablado===objetivo){ validado=true; statusEl.style.color='green'; statusEl.textContent='✅ Autenticación exitosa.'; btn.textContent='Continuar'; } else if(!validado){ statusEl.style.color='red'; statusEl.textContent='❌ No coincidió. Inténtalo nuevamente.'; btn.textContent='Reintentar'; } });
+        recog.addEventListener('error',()=>{ statusEl.style.color='red'; statusEl.textContent='⚠️ Error al escuchar. Inténtalo otra vez.'; btn.textContent='Reintentar'; }); recog.addEventListener('speechend',()=>recog.stop());
+        btn.addEventListener('click',()=>{ if(validado){ const rol=<?= json_encode($_SESSION['temp_rol'] ?? '') ?>; window.location.href=window.location.pathname+'?voice=1&confirm='+encodeURIComponent(rol); }else{ if(btn.textContent==='Reintentar') nuevaFrase(); btn.textContent='Escuchando...'; recog.start(); }});
+        window.onload=mostrarModal;
+    }
+</script>
+<?php endif; ?>
 </body>
 </html>
