@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#2E7D32">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="manifest" href="manifest.json">
+  <title>Mi PWA - Inicio</title>
+</head>
+<body>
+    <h1>PWA</h1>
+    <p>En este apartado estableceremos las bases del archivo manifiesto de tu primera PWA.</p>
+    <img src="icons/icon-512x512.png" alt="Icono PWA" class="icon-preview">
+    <script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js')
+    .then(() => console.log('Service Worker registrado'))
+    .catch(err => console.warn('Error registrando SW:', err));
+}
+</script>
+</body>
+</html>
+

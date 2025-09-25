@@ -13,7 +13,7 @@ function testCalculoPuntos() {
 
     foreach ($casos as $caso) {
         $resultado = calcularPuntos($caso['monto']);
-        $estado = ($resultado == $caso['esperado']) ? '✅ OK' : '❌ ERROR';
+        $estado = ($resultado == $caso['esperado']) ? '✓ OK' : 'X ERROR';
         echo "Monto: {$caso['monto']} - Esperado: {$caso['esperado']} - Obtenido: {$resultado} => $estado\n";
     }
 }
