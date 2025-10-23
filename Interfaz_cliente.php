@@ -245,5 +245,55 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 </script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  // Función para mostrar notificación
+  function mostrarNotificacion(titulo, mensaje) {
+    if (!("Notification" in window)) {
+      console.warn("Este navegador no soporta notificaciones.");
+      return;
+    }
+
+    if (Notification.permission === "granted") {
+      const opciones = {
+        body: mensaje,
+        icon: "img/logo.png"
+      };
+      const notificacion = new Notification(titulo, opciones);
+      setTimeout(() => notificacion.close(), 5000);
+    } else if (Notification.permission === "default") {
+      Notification.requestPermission().then(permiso => {
+        if (permiso === "granted") mostrarNotificacion(titulo, mensaje);
+      });
+    } else {
+      console.log("El usuario no aceptó recibir notificaciones.");
+    }
+  }
+
+  // Notificación inicial si se acaba de crear tarjeta digital
+  const tarjetaCreada = <?= json_encode($u['tarjeta_digital'] === 'si') ?>;
+  if (tarjetaCreada) {
+    mostrarNotificacion("¡Tarjeta Digital Lista!", "Tu tarjeta digital ha sido generada correctamente. ¡Comienza a acumular puntos!");
+  }
+
+  // Ejemplo: notificación de puntos acumulados
+  const puntos = <?= json_encode($u['puntos']) ?>;
+  if (puntos > 0) {
+    mostrarNotificacion("Tus puntos", `Tienes ${puntos} puntos acumulados.`);
+  }
+
+  // Opcional: botón para probar notificación
+  const btnTestNotif = document.createElement("button");
+  btnTestNotif.textContent = "Probar Notificación";
+  btnTestNotif.className = "btn btn-sm btn-outline-info mt-3";
+  document.querySelector(".container")?.appendChild(btnTestNotif);
+  btnTestNotif.addEventListener("click", () => {
+    mostrarNotificacion("Notificación de prueba", "Esta es una notificación de prueba en tu cuenta.");
+  });
+
+});
+</script>
+
 </body>
 </html>
