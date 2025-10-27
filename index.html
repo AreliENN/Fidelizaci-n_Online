@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#2E7D32">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="manifest" href="manifest.json">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/UpUp/1.1.0/upup.min.js"></script>
+  <script src="/upup.js"></script>
+  <script defer src="/offline.js"></script>
+  <script defer src="instalar.js"></script>
+  <script defer src="notificaciones.js"></script>
+  <title>Mi PWA - Pruebas</title>
+</head>
+
+<body>
+  <h1>Mi PWA</h1>
+  <p>Este es el inicio de tu PWA con pruebas de notificaciones y del Contact Picker API.</p>
+  
+  <img src="icons/icon-512x512.png" alt="Icono PWA" class="icon-preview">
+
+  <section>
+    <h2>Instalación y notificaciones</h2>
+    <button id="btnInstalar">Instalar PWA</button>
+    <button id="btnNotificar">Probar notificación</button>
+    <p id="status">Estado: no suscrito</p>
+  </section>
+
+  <hr>
+
+  <section>
+    <h2>Prueba Contact Picker API</h2>
+    <button id="btnProbar">Verificar soporte</button>
+    <p id="resultado"></p>
+  </section>
+
+  <!-- ===== SCRIPT DE NOTIFICACIONES Y PWA ===== -->
+  <script>
+    const publicVapidKey = "TU_CLAVE_PUBLICA_VAPID"; // Reemplaza con tu clave pública real
+
+    async function initPush() {
+      if (!('serviceWorker' in navigator)) {
+        alert('Service Worker no soportado en este navegador');
+        return;
+      }
+
+      const register = await navigator.serviceWorker.register('/sw.js');
+      console.log('Service Worker registrado');
+
+      let subscription = await register.pushManager.getSubscription();
+      if (subscription) {
+        console.log('Ya está suscrito:', subscription);
+        document.getElementById('status').textContent = 'Estado: suscrito';
+        return;
+      }
+
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        alert('Permiso de notificaciones denegado');
+        return;
+      }
+
+      subscription = await register.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
+      });
+
+      console.log('Suscripción creada:', subscription);
+      document.getElementById('status').textContent = 'Estado: suscrito';
+
+      await fetch('/subscribe', {
+        method: 'POST',
+        body: JSON.stringify(subscription),
+        headers: { 'Content-Type': 'application/json' }
+      });
+      console.log('Suscripción enviada al servidor');
+    }
+
+    function urlBase64ToUint8Array(base64String) {
+      const padding = '='.repeat((4 - base64String.length % 4) % 4);
+      const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+      const rawData = window.atob(base64);
+      return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
+    }
+
+    window.addEventListener('load', initPush);
+  </script>
+
+  <!-- ===== SCRIPT DE CONTACT PICKER ===== -->
+  <script>
+    document.getElementById("btnProbar").addEventListener("click", () => {
+      const soportado = ('contacts' in navigator && 'contactsManager' in window);
+      const resultado = document.getElementById("resultado");
+      
+      if (soportado) {
+        resultado.textContent = "✅ Tu navegador soporta la Contact Picker API.";
+      } else {
+        resultado.textContent = "❌ Contact Picker API no está soportado en este navegador.";
+      }
+    });
+  </script>
+
+</body>
+</html>
