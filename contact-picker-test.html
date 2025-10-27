@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Prueba Contact Picker</title>
+</head>
+<body>
+  <h2>Prueba Contact Picker API</h2>
+  <button id="btnProbar">Verificar soporte</button>
+  <p id="resultado"></p>
+
+  <script>
+    document.getElementById("btnProbar").addEventListener("click", () => {
+      const soportado = ('contacts' in navigator && 'contactsManager' in window);
+      const resultado = document.getElementById("resultado");
+      
+      if (soportado) {
+        resultado.textContent = "✅ Tu navegador soporta la Contact Picker API.";
+      } else {
+        resultado.textContent = "❌ Contact Picker API no está soportado en este navegador.";
+      }
+    });
+  </script>
+</body>
+</html>
