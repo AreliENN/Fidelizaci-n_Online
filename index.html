@@ -4,22 +4,25 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#2E7D32">
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="./css/style.css">
+  <link rel="manifest" href="./manifest.json">
+
+  <!-- Librerías -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/UpUp/1.1.0/upup.min.js"></script>
-  <script src="/upup.js"></script>
-  <script defer src="/offline.js"></script>
-  <script defer src="instalar.js"></script>
-  <script defer src="notificaciones.js"></script>
+  <script src="./upup.js"></script>
+  <script defer src="./offline.js"></script>
+  <script defer src="./instalar.js"></script>
+  <script defer src="./notificaciones.js"></script>
+
   <title>Mi PWA - Pruebas</title>
 </head>
 
 <body>
   <h1>Mi PWA</h1>
-  <p>Este es el inicio de tu PWA con pruebas de notificaciones y del Contact Picker API.</p>
-  
-  <img src="icons/icon-512x512.png" alt="Icono PWA" class="icon-preview">
+  <p>Inicio de tu PWA con pruebas de notificaciones y Contact Picker API.</p>
+  <img src="./icons/icon-512x512.png" alt="Icono PWA" class="icon-preview">
 
+  <!-- ================= INSTALACIÓN Y NOTIFICACIONES ================= -->
   <section>
     <h2>Instalación y notificaciones</h2>
     <button id="btnInstalar">Instalar PWA</button>
@@ -29,15 +32,17 @@
 
   <hr>
 
+  <!-- ================= CONTACT PICKER ================= -->
   <section>
     <h2>Prueba Contact Picker API</h2>
     <button id="btnProbar">Verificar soporte</button>
+    <button id="btnElegir">Elegir contacto</button>
     <p id="resultado"></p>
   </section>
 
-  <!-- ===== SCRIPT DE NOTIFICACIONES Y PWA ===== -->
+  <!-- ================= SCRIPT DE NOTIFICACIONES ================= -->
   <script>
-    const publicVapidKey = "TU_CLAVE_PUBLICA_VAPID"; // Reemplaza con tu clave pública real
+    const publicVapidKey = "TU_CLAVE_PUBLICA_VAPID"; // reemplaza si tienes servidor
 
     async function initPush() {
       if (!('serviceWorker' in navigator)) {
@@ -45,12 +50,12 @@
         return;
       }
 
-      const register = await navigator.serviceWorker.register('/sw.js');
-      console.log('Service Worker registrado');
+      // IMPORTANTE: usar ruta relativa
+      const register = await navigator.serviceWorker.register('./sw.js');
+      console.log('Service Worker registrado con scope:', register.scope);
 
       let subscription = await register.pushManager.getSubscription();
       if (subscription) {
-        console.log('Ya está suscrito:', subscription);
         document.getElementById('status').textContent = 'Estado: suscrito';
         return;
       }
@@ -66,37 +71,58 @@
         applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
       });
 
-      console.log('Suscripción creada:', subscription);
       document.getElementById('status').textContent = 'Estado: suscrito';
+      console.log('Suscripción creada:', subscription);
 
-      await fetch('/subscribe', {
-        method: 'POST',
-        body: JSON.stringify(subscription),
-        headers: { 'Content-Type': 'application/json' }
-      });
-      console.log('Suscripción enviada al servidor');
+      // GitHub Pages no tiene backend, esto fallará (solo demostrativo)
+      try {
+        await fetch('./subscribe', {
+          method: 'POST',
+          body: JSON.stringify(subscription),
+          headers: { 'Content-Type': 'application/json' }
+        });
+      } catch (err) {
+        console.log('No se pudo enviar suscripción (sin servidor).');
+      }
     }
 
     function urlBase64ToUint8Array(base64String) {
       const padding = '='.repeat((4 - base64String.length % 4) % 4);
       const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-      const rawData = window.atob(base64);
+      const rawData = atob(base64);
       return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
     }
 
     window.addEventListener('load', initPush);
   </script>
 
-  <!-- ===== SCRIPT DE CONTACT PICKER ===== -->
+  <!-- ================= SCRIPT DE CONTACT PICKER ================= -->
   <script>
+    const r = document.getElementById("resultado");
+
+    function soportaContactPicker() {
+      return 'contacts' in navigator && 'select' in navigator.contacts && window.isSecureContext;
+    }
+
     document.getElementById("btnProbar").addEventListener("click", () => {
-      const soportado = ('contacts' in navigator && 'contactsManager' in window);
-      const resultado = document.getElementById("resultado");
-      
-      if (soportado) {
-        resultado.textContent = "✅ Tu navegador soporta la Contact Picker API.";
+      if (soportaContactPicker()) {
+        r.textContent = "✅ Tu navegador soporta la Contact Picker API.";
       } else {
-        resultado.textContent = "❌ Contact Picker API no está soportado en este navegador.";
+        r.textContent = "❌ Contact Picker API no está soportado (usa Chrome para Android).";
+      }
+    });
+
+    document.getElementById("btnElegir").addEventListener("click", async () => {
+      if (!soportaContactPicker()) {
+        r.textContent = "API no disponible.";
+        return;
+      }
+
+      try {
+        const contactos = await navigator.contacts.select(['name','tel','email'], { multiple: false });
+        r.textContent = "Elegiste: " + JSON.stringify(contactos);
+      } catch (e) {
+        r.textContent = "Operación cancelada o bloqueada.";
       }
     });
   </script>
