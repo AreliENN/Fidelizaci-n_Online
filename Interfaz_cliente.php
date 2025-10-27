@@ -162,6 +162,27 @@ $u = $stmt->fetch(PDO::FETCH_ASSOC);
     </div>
 
   <?php else: ?>
+    <!-- ============ PRUEBA: CONTACTO DE CONFIANZA (sin BD) ============ -->
+<div class="bg-white p-3 rounded shadow-sm mb-4">
+  <h4 class="mb-2">Prueba Contact Picker</h4>
+  <p id="cp_help" class="text-muted mb-3">Pulsa el botón para elegir un contacto desde tu dispositivo.</p>
+
+  <button class="btn btn-primary" type="button" id="cp_btn">Elegir contacto</button>
+
+  <div id="cp_result" class="mt-3 d-none">
+    <h6 class="mb-2">Contacto seleccionado</h6>
+    <ul class="list-group">
+      <li class="list-group-item"><strong>Nombre:</strong> <span id="cp_nombre"></span></li>
+      <li class="list-group-item"><strong>Teléfono:</strong> <span id="cp_tel"></span></li>
+      <li class="list-group-item"><strong>Email:</strong> <span id="cp_email"></span></li>
+    </ul>
+    <details class="mt-3">
+      <summary>Ver JSON devuelto</summary>
+      <pre id="cp_raw" class="bg-light p-2 small border rounded mt-2"></pre>
+    </details>
+  </div>
+</div>
+
     <div class="text-center mb-4">
       <h2>Bienvenid@, <?= htmlspecialchars($u['nombre'].' '.$u['apellidos']) ?></h2>
       
@@ -245,5 +266,51 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 </script>
+<script>
+(function () {
+  const supports = ('contacts' in navigator) && ('select' in navigator.contacts) && window.isSecureContext;
+
+  const btn    = document.getElementById('cp_btn');
+  const help   = document.getElementById('cp_help');
+  const box    = document.getElementById('cp_result');
+  const outNom = document.getElementById('cp_nombre');
+  const outTel = document.getElementById('cp_tel');
+  const outEmail = document.getElementById('cp_email');
+  const outRaw = document.getElementById('cp_raw');
+
+  if (!btn) return;
+
+  if (!supports) {
+    // Oculta el botón si no hay soporte (escritorio/iOS), y muestra explicación
+    btn.style.display = 'none';
+    if (help) help.textContent = 'El selector de contactos solo está disponible en Chrome para Android y bajo HTTPS/localhost.';
+    return;
+  }
+
+  btn.addEventListener('click', async () => {
+    try {
+      const picked = await navigator.contacts.select(['name', 'tel', 'email'], { multiple: false });
+      if (!picked || !picked.length) return;
+
+      const c = picked[0] || {};
+      const nombre = Array.isArray(c.name)  && c.name[0]  ? c.name[0]  : '';
+      const tel    = Array.isArray(c.tel)   && c.tel[0]   ? c.tel[0]   : '';
+      const email  = Array.isArray(c.email) && c.email[0] ? c.email[0] : '';
+
+      outNom.textContent = nombre || '(sin nombre)';
+      outTel.textContent = tel ? tel.replace(/[^\d+]/g, '') : '(sin teléfono)';
+      outEmail.textContent = email || '(sin email)';
+
+      outRaw.textContent = JSON.stringify(picked, null, 2);
+
+      box.classList.remove('d-none');
+    } catch (err) {
+      // Usuario canceló o bloqueó el acceso
+      console.log('Contact Picker cancelado/bloqueado:', err);
+    }
+  });
+})();
+</script>
+
 </body>
 </html>
