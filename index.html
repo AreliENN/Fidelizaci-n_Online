@@ -39,6 +39,13 @@
     <p id="resultado"></p>
   </section>
 
+   <section>
+    <h2>Prueba PWA Camera</h2>
+    <button id="btnElegir">Ir a pagina</button>
+    <button src="/Fidelizacion_Prueba.html"></button>
+
+  </section>
+
   <!-- ================= SCRIPT DE NOTIFICACIONES ================= -->
   <script>
     const publicVapidKey = "TU_CLAVE_PUBLICA_VAPID"; // reemplaza si tienes servidor
@@ -73,7 +80,7 @@
       document.getElementById('status').textContent = 'Estado: suscrito';
       console.log('Suscripción creada:', subscription);
 
-      // GitHub Pages no tiene backend, esto fallará (solo demostrativo)
+      // GitHub Pages no tiene backend, esto fallará 
       try {
         await fetch('./subscribe', {
           method: 'POST',
