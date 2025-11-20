@@ -1,130 +1,346 @@
+Fidelizacion_Prueba.html
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#2E7D32">
-  <link rel="stylesheet" href="./css/style.css">
-  <link rel="manifest" href="./manifest.json">
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/UpUp/1.1.0/upup.min.js"></script>
-  <script src="./upup.js"></script>
-  <script defer src="./offline.js"></script>
-  <script defer src="./instalar.js"></script>
-  <script defer src="./notificaciones.js"></script>
-
-  <title>Mi PWA - Pruebas</title>
+  <title>Mi Cuenta - Fidelización</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background: #eef2f5; }
+    .card-virtual {
+      max-width: 380px;
+      margin: auto;
+      padding: 1.5rem;
+      border-radius: 16px;
+      background: #FFA500;
+      color: #000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    .card-number {
+      font-size: 1.3rem;
+      letter-spacing: 2px;
+      margin: 1rem 0;
+      font-weight: bold;
+    }
+  </style>
 </head>
-
 <body>
-  <h1>Mi PWA</h1>
-  <p>Inicio de tu PWA con pruebas de notificaciones y Contact Picker API.</p>
-  <img src="./icons/icon-512x512.
-  png" alt="Icono PWA" class="icon-preview">
+<div class="container py-4">
+  <!-- Barra superior -->
+  <nav class="navbar navbar-light bg-light">
+    <div class="container-fluid">
+      <span class="navbar-brand mb-0 h1">Mi Cuenta</span>
+      <!-- En HTML puro esto solo es un enlace normal -->
+      <a href="#" class="btn btn-outline-danger">Cerrar sesión</a>
+    </div>
+  </nav>
+
+  <!-- ====== MODALES PARA CUANDO NO TIENE TARJETA ====== -->
+  <!-- Modal: Confirmación creación tarjeta -->
+  <div class="modal" id="modalConfirm" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title">Generar Tarjeta Digital</h5></div>
+        <div class="modal-body">
+          <p>Crea tu tarjeta digital para acceder a la app.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="btnAccept" class="btn btn-primary">Aceptar</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Rechazar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Verificación de teléfono -->
+  <div class="modal" id="modalPhone" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form>
+          <div class="modal-header"><h5 class="modal-title">Verificar Teléfono</h5></div>
+          <div class="modal-body">
+            <p>Escribe tu número de teléfono registrado:</p>
+            <!-- En la versión PHP aquí aparecía el mensaje de error, ahora solo es estático -->
+            <input type="text" name="telefono_movil" class="form-control" required>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary">Generar Tarjeta</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bienvenida -->
+  <div class="text-center mb-4">
+    <h2>Bienvenid@, Juan Pérez</h2>
+  </div>
+
+  <!-- Foto actual + Botón Subir foto -->
+<div class="text-center mb-3">
+    <img id="fotoPerfil"
+         src="img/cliente_ejemplo.jpg"
+         alt="Foto del cliente"
+         class="rounded-circle shadow"
+         style="width: 140px; height: 140px; object-fit: cover; border: 3px solid #ccc;">
+
+    <div class="mt-3">
+        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalFoto">
+            Subir foto
+        </button>
+    </div>
+</div>
 
 
-  <section>
-    <h2>Instalación y notificaciones</h2>
-    <button id="btnInstalar">Instalar PWA</button>
-    <button id="btnNotificar">Probar notificación</button>
-    <p id="status">Estado: no suscrito</p>
-  </section>
+  <!-- Tarjeta digital -->
+  <div class="card-virtual mb-4 text-center">
+    <div class="mb-2">
+      <strong>Tarjeta</strong><br>
+      <span class="card-number">1234 5678 9012 3456</span>
+    </div>
+    <div class="mb-3">
+      <img src="img/logo.png" alt="DigitalFi Bank"
+           style="width: 20%; max-width: 250px; border-radius: 10px;">
+    </div>
+    <div>
+      <a href="#" class="btn btn-sm btn-outline-dark" data-bs-toggle="modal" data-bs-target="#detallesCard">
+        Detalle de tarjeta
+      </a>
+    </div>
+  </div>
 
-  <hr>
+  <!-- Modal detalles Tarjeta-->
+  <div class="modal fade" id="detallesCard" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title">Detalles de tu Tarjeta</h5></div>
+        <div class="modal-body text-center">
+          <p><strong>Número:</strong> 1234 5678 9012 3456</p>
+          <p><strong>Fecha de vencimiento:</strong> 12/2029</p>
+          <p><strong>CVV:</strong> 123</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary" data-bs-dismiss="modal">Vale</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-  <section>
-    <h2>Prueba Contact Picker API</h2>
-    <button id="btnProbar">Verificar soporte</button>
-    <button id="btnElegir">Elegir contacto</button>
-    <p id="resultado"></p>
-  </section>
+  <!-- Puntos -->
+  <div class="text-center mb-4">
+    <h5 style="color: #444;">Puntos acumulados</h5>
+    <p class="display-6 fw-bold">120.0 puntos</p>
+  </div>
 
-  <!-- ================= SCRIPT DE NOTIFICACIONES ================= -->
-  <script>
-    const publicVapidKey = "TU_CLAVE_PUBLICA_VAPID"; // reemplaza si tienes servidor
+  <!-- Premios y beneficios -->
+  <div class="d-flex justify-content-around bg-white py-3 rounded shadow-sm mb-4">
+    <div class="text-center">
+      <div style="font-size: 1.2rem; font-weight: bold;">Premios</div>
+      <div style="font-size: 1.5rem;" class="mt-2">
+        <a href="#" class="btn btn-outline-success btn-sm">Ver</a>
+      </div>
+    </div>
+    <div class="text-center border-start ps-3">
+      <div style="font-size: 1.2rem; font-weight: bold;">Beneficios</div>
+      <div style="font-size: 1.5rem;" class="mt-2">
+        <a href="#" class="btn btn-outline-warning btn-sm">Ver</a>
+      </div>
+    </div>
+  </div>
 
-    async function initPush() {
-      if (!('serviceWorker' in navigator)) {
-        alert('Service Worker no soportado en este navegador');
-        return;
-      }
+</div>
 
-      // IMPORTANTE: usar ruta relativa
-      const register = await navigator.serviceWorker.register('./sw.js');
-      console.log('Service Worker registrado con scope:', register.scope);
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-      let subscription = await register.pushManager.getSubscription();
-      if (subscription) {
-        document.getElementById('status').textContent = 'Estado: suscrito';
-        return;
-      }
+<script>
+// Simula si el usuario YA tiene tarjeta o NO.
+// true  = tiene tarjeta -> se muestra la tarjeta
+// false = no tiene tarjeta -> se muestran los modales de creación
+document.addEventListener('DOMContentLoaded', () => {
+  const hasCard = true; // cámbialo a false para probar el flujo sin tarjeta
 
-      const permission = await Notification.requestPermission();
-      if (permission !== 'granted') {
-        alert('Permiso de notificaciones denegado');
-        return;
-      }
+  if (!hasCard) {
+    const modalConfirm = new bootstrap.Modal(document.getElementById('modalConfirm'), {
+      backdrop: 'static',
+      keyboard: false
+    });
+    modalConfirm.show();
 
-      subscription = await register.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
+    document.getElementById('btnAccept').addEventListener('click', () => {
+      modalConfirm.hide();
+      const modalPhone = new bootstrap.Modal(document.getElementById('modalPhone'), {
+        backdrop: 'static',
+        keyboard: false
       });
-
-      document.getElementById('status').textContent = 'Estado: suscrito';
-      console.log('Suscripción creada:', subscription);
-
-      // GitHub Pages no tiene backend, esto fallará (solo demostrativo)
-      try {
-        await fetch('./subscribe', {
-          method: 'POST',
-          body: JSON.stringify(subscription),
-          headers: { 'Content-Type': 'application/json' }
-        });
-      } catch (err) {
-        console.log('No se pudo enviar suscripción (sin servidor).');
-      }
-    }
-
-    function urlBase64ToUint8Array(base64String) {
-      const padding = '='.repeat((4 - base64String.length % 4) % 4);
-      const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-      const rawData = atob(base64);
-      return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
-    }
-
-    window.addEventListener('load', initPush);
-  </script>
-
-  <!-- ================= SCRIPT DE CONTACT PICKER ================= -->
-  <script>
-    const r = document.getElementById("resultado");
-
-    function soportaContactPicker() {
-      return 'contacts' in navigator && 'select' in navigator.contacts && window.isSecureContext;
-    }
-
-    document.getElementById("btnProbar").addEventListener("click", () => {
-      if (soportaContactPicker()) {
-        r.textContent = " Tu navegador soporta la Contact Picker API.";
-      } else {
-        r.textContent = " Contact Picker API no está soportado (usa Chrome para Android).";
-      }
+      modalPhone.show();
     });
+  }
+});
+</script>
 
-    document.getElementById("btnElegir").addEventListener("click", async () => {
-      if (!soportaContactPicker()) {
-        r.textContent = "API no disponible.";
-        return;
-      }
+<script>
+// Contact Picker API (solo funciona en algunos navegadores)
+(function () {
+  const supports = ('contacts' in navigator) && ('select' in navigator.contacts) && window.isSecureContext;
 
-      try {
-        const contactos = await navigator.contacts.select(['name','tel','email'], { multiple: false });
-        r.textContent = "Elegiste: " + JSON.stringify(contactos);
-      } catch (e) {
-        r.textContent = "Operación cancelada o bloqueada.";
-      }
-    });
-  </script>
+  const btn    = document.getElementById('cp_btn');
+  const help   = document.getElementById('cp_help');
+  const box    = document.getElementById('cp_result');
+  const outNom = document.getElementById('cp_nombre');
+  const outTel = document.getElementById('cp_tel');
+  const outEmail = document.getElementById('cp_email');
+  const outRaw = document.getElementById('cp_raw');
+
+  if (!btn) return;
+
+  if (!supports) {
+    btn.style.display = 'none';
+    if (help) help.textContent = 'El selector de contactos solo está disponible en Chrome para Android y bajo HTTPS/localhost.';
+    return;
+  }
+
+  btn.addEventListener('click', async () => {
+    try {
+      const picked = await navigator.contacts.select(['name', 'tel', 'email'], { multiple: false });
+      if (!picked || !picked.length) return;
+
+      const c = picked[0] || {};
+      const nombre = Array.isArray(c.name)  && c.name[0]  ? c.name[0]  : '';
+      const tel    = Array.isArray(c.tel)   && c.tel[0]   ? c.tel[0]   : '';
+      const email  = Array.isArray(c.email) && c.email[0] ? c.email[0] : '';
+
+      outNom.textContent = nombre || '(sin nombre)';
+      outTel.textContent = tel ? tel.replace(/[^\d+]/g, '') : '(sin teléfono)';
+      outEmail.textContent = email || '(sin email)';
+
+      outRaw.textContent = JSON.stringify(picked, null, 2);
+
+      box.classList.remove('d-none');
+    } catch (err) {
+      console.log('Contact Picker cancelado/bloqueado:', err);
+    }
+  });
+})();
+</script>
+<!-- Modal para tomar/seleccionar foto -->
+<div class="modal fade" id="modalFoto" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Actualizar foto de perfil</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body text-center">
+
+        <!-- Vista previa -->
+        <img id="previewFoto" 
+             src="" 
+             class="rounded-circle d-none mb-3"
+             style="width: 140px; height: 140px; object-fit: cover; border: 3px solid #ccc;">
+
+        <!-- Video de la cámara -->
+        <video id="videoCam" autoplay playsinline 
+               class="w-100 d-none"
+               style="border-radius: 10px;"></video>
+
+        <div class="d-grid gap-2 mt-3">
+          <button class="btn btn-secondary" id="btnTomarFoto">Tomar foto</button>
+          <input type="file" accept="image/*" id="fileFoto" class="form-control mt-2">
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-success d-none" id="btnGuardarFoto">Guardar</button>
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Canvas oculto para procesar foto -->
+<canvas id="canvasFoto" class="d-none"></canvas>
+<script>
+/* === MANEJO DE FOTO DE PERFIL === */
+
+const videoCam = document.getElementById('videoCam');
+const previewFoto = document.getElementById('previewFoto');
+const fileFoto = document.getElementById('fileFoto');
+const btnTomarFoto = document.getElementById('btnTomarFoto');
+const btnGuardarFoto = document.getElementById('btnGuardarFoto');
+const canvasFoto = document.getElementById('canvasFoto');
+const fotoPerfil = document.getElementById('fotoPerfil');
+
+let stream = null;
+
+// Al abrir el modal, inicia cámara
+document.getElementById('modalFoto').addEventListener('shown.bs.modal', async () => {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    videoCam.srcObject = stream;
+    videoCam.classList.remove('d-none');
+    previewFoto.classList.add('d-none');
+  } catch (err) {
+    alert("No se pudo acceder a la cámara");
+    console.error(err);
+  }
+});
+
+// Al cerrar el modal, detiene cámara
+document.getElementById('modalFoto').addEventListener('hidden.bs.modal', () => {
+  if (stream) {
+    stream.getTracks().forEach(t => t.stop());
+  }
+});
+
+// Tomar foto desde la cámara
+btnTomarFoto.addEventListener('click', () => {
+  canvasFoto.width = videoCam.videoWidth;
+  canvasFoto.height = videoCam.videoHeight;
+
+  const ctx = canvasFoto.getContext('2d');
+  ctx.drawImage(videoCam, 0, 0, canvasFoto.width, canvasFoto.height);
+
+  const dataURL = canvasFoto.toDataURL('image/jpeg');
+
+  previewFoto.src = dataURL;
+  previewFoto.classList.remove('d-none');
+  btnGuardarFoto.classList.remove('d-none');
+
+  videoCam.classList.add('d-none');
+});
+
+// Cargar imagen desde galería
+fileFoto.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    previewFoto.src = reader.result;
+    previewFoto.classList.remove('d-none');
+    btnGuardarFoto.classList.remove('d-none');
+    videoCam.classList.add('d-none');
+  };
+  reader.readAsDataURL(file);
+});
+
+// Guardar foto como perfil
+btnGuardarFoto.addEventListener('click', () => {
+  fotoPerfil.src = previewFoto.src;
+
+  // ✨ Aquí puedes hacer un fetch() y subir la imagen al servidor
+
+  bootstrap.Modal.getInstance(document.getElementById('modalFoto')).hide();
+});
+</script>
 
 </body>
 </html>
