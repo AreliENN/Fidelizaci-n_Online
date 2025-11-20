@@ -97,6 +97,10 @@
         <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalFoto">
             Subir foto
         </button>
+        <button id="switchCameraBtn" class="btn-switch-camera">
+  🔄 Cambiar cámara
+</button>
+
     </div>
 </div>
 
@@ -283,7 +287,37 @@ const btnGuardarFoto = document.getElementById('btnGuardarFoto');
 const canvasFoto = document.getElementById('canvasFoto');
 const fotoPerfil = document.getElementById('fotoPerfil');
 
+let currentFacingMode = "environment"; // Comienza con cámara trasera
 let stream = null;
+
+async function startCamera() {
+    try {
+        // Si ya hay una cámara activa, detenerla
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+        }
+
+        // Solicitar cámara con el facingMode activo
+        stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: currentFacingMode }
+        });
+
+        const videoElement = document.querySelector("#videoPreview");
+        videoElement.srcObject = stream;
+        await videoElement.play();
+
+    } catch (error) {
+        console.error("No se pudo iniciar la cámara:", error);
+        alert("Error al iniciar la cámara. Este dispositivo podría no soportar la cámara seleccionada.");
+    }
+}
+
+// Cambiar entre frontal ↔ trasera
+document.getElementById("switchCameraBtn").addEventListener("click", async () => {
+    currentFacingMode = currentFacingMode === "environment" ? "user" : "environment";
+    await startCamera();
+});
+
 
 // Al abrir el modal, inicia cámara (intentando usar cámara trasera)
 document.getElementById('modalFoto').addEventListener('shown.bs.modal', async () => {
