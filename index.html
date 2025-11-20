@@ -285,18 +285,36 @@ const fotoPerfil = document.getElementById('fotoPerfil');
 
 let stream = null;
 
-// Al abrir el modal, inicia cámara
+// Al abrir el modal, inicia cámara (intentando usar cámara trasera)
 document.getElementById('modalFoto').addEventListener('shown.bs.modal', async () => {
   try {
-    stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    videoCam.srcObject = stream;
-    videoCam.classList.remove('d-none');
-    previewFoto.classList.add('d-none');
-  } catch (err) {
-    alert("No se pudo acceder a la cámara");
-    console.error(err);
+    // Preferir cámara trasera si el dispositivo la tiene
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: { exact: "environment" } // fuerza cámara trasera
+      }
+    });
+
+  } catch (e) {
+    console.warn("No se pudo acceder a la cámara trasera, se intentará la frontal", e);
+
+    try {
+      // Si falla, usar cámara frontal
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user" }
+      });
+    } catch (err2) {
+      alert("No se pudo acceder a ninguna cámara");
+      console.error(err2);
+      return;
+    }
   }
+
+  videoCam.srcObject = stream;
+  videoCam.classList.remove('d-none');
+  previewFoto.classList.add('d-none');
 });
+
 
 // Al cerrar el modal, detiene cámara
 document.getElementById('modalFoto').addEventListener('hidden.bs.modal', () => {
